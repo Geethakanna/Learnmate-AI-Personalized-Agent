@@ -94,6 +94,44 @@ export type Database = {
         }
         Relationships: []
       }
+      flashcards: {
+        Row: {
+          back: string
+          created_at: string
+          difficulty: string | null
+          document_id: string | null
+          front: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          back: string
+          created_at?: string
+          difficulty?: string | null
+          document_id?: string | null
+          front: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          back?: string
+          created_at?: string
+          difficulty?: string | null
+          document_id?: string | null
+          front?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string | null
