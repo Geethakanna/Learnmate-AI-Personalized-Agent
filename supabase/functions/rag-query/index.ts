@@ -22,7 +22,15 @@ serve(async (req) => {
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
+    const openaiApiKey = Deno.env.get("OPENAI_API_KEY");
+
+    if (!openaiApiKey) {
+      console.error("OPENAI_API_KEY not configured");
+      return new Response(JSON.stringify({ error: "AI service not configured" }), {
+        status: 500,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const supabase = createClient(supabaseUrl, supabaseAnonKey, {
       global: { headers: { Authorization: authHeader } },
@@ -47,6 +55,8 @@ serve(async (req) => {
       });
     }
 
+    console.log(`Processing question for document ${documentId}: ${question}`);
+
     // Fetch document chunks
     const { data: chunks, error: chunksError } = await supabase
       .from("document_chunks")
@@ -65,78 +75,131 @@ serve(async (req) => {
 
     if (!chunks || chunks.length === 0) {
       return new Response(JSON.stringify({ 
-        answer: "No content found in this document.",
+        answer: "No content found in this document. Please ensure the document was processed correctly.",
         citations: []
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    // Simple keyword-based retrieval (top-k most relevant chunks)
-    const questionWords = question.toLowerCase().split(/\s+/).filter((w: string) => w.length > 3);
+    console.log(`Found ${chunks.length} chunks for document`);
+
+    // Enhanced keyword-based retrieval with better scoring
+    const questionLower = question.toLowerCase();
+    const questionWords = questionLower
+      .split(/\s+/)
+      .filter((w: string) => w.length > 2)
+      .filter((w: string) => !['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'her', 'was', 'one', 'our', 'out', 'has', 'have', 'been', 'would', 'could', 'what', 'when', 'where', 'which', 'their', 'will', 'with', 'this', 'that', 'from', 'they', 'been'].includes(w));
+
     const scoredChunks = chunks.map((chunk: any) => {
       const content = chunk.content.toLowerCase();
       let score = 0;
-      for (const word of questionWords) {
-        if (content.includes(word)) score += 1;
+      
+      // Exact phrase match bonus
+      if (content.includes(questionLower)) {
+        score += 10;
       }
-      return { ...chunk, score };
+      
+      // Individual word matches
+      for (const word of questionWords) {
+        const matches = (content.match(new RegExp(word, 'gi')) || []).length;
+        score += matches * 2;
+      }
+      
+      // Boost chunks with higher density of matches
+      const wordCount = content.split(/\s+/).length;
+      const density = score / (wordCount / 100);
+      
+      return { ...chunk, score: score + density };
     });
 
     scoredChunks.sort((a: any, b: any) => b.score - a.score);
-    const topChunks = scoredChunks.slice(0, 5);
-    const context = topChunks.map((c: any) => c.content).join("\n\n---\n\n");
+    
+    // Get more chunks for better context
+    const topChunks = scoredChunks.slice(0, 8);
+    const context = topChunks.map((c: any, i: number) => 
+      `[Source ${i + 1}${c.page_number ? `, Page ${c.page_number}` : ''}]:\n${c.content}`
+    ).join("\n\n---\n\n");
 
-    // Call Lovable AI
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    console.log(`Using ${topChunks.length} chunks for context`);
+
+    // Call OpenAI API with detailed system prompt
+    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
+        Authorization: `Bearer ${openaiApiKey}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "gpt-4o-mini",
         messages: [
           {
             role: "system",
-            content: `You are a helpful study assistant. Answer questions based ONLY on the provided document context. 
-If the answer is not in the context, say "I couldn't find this information in your document."
-Be concise and cite which parts of the document you're referencing.`,
+            content: `You are Learn Mate, an expert AI study assistant designed to help students learn effectively from their documents.
+
+Your role is to provide comprehensive, educational answers that:
+1. **Directly answer the question** using ONLY information from the provided document context
+2. **Explain concepts thoroughly** - break down complex topics into understandable parts
+3. **Provide examples** when relevant to illustrate points
+4. **Use clear structure** - use headings, bullet points, and numbered lists for clarity
+5. **Cite your sources** - reference which parts of the document support your answer
+
+IMPORTANT RULES:
+- Base your answers STRICTLY on the document content provided
+- If the information is not in the document, clearly state: "I couldn't find this specific information in your document. The document covers [related topics you did find]."
+- Never make up or assume information not present in the context
+- Be thorough but focused - provide detail relevant to the question
+- Use markdown formatting for better readability`,
           },
           {
             role: "user",
-            content: `Context from the document:\n\n${context}\n\n---\n\nQuestion: ${question}`,
+            content: `Here is the relevant content from the user's document:
+
+${context}
+
+---
+
+**User's Question:** ${question}
+
+Please provide a detailed, educational answer based on the document content above.`,
           },
         ],
+        temperature: 0.3,
+        max_tokens: 2000,
       }),
     });
 
     if (!aiResponse.ok) {
+      const errorText = await aiResponse.text();
+      console.error("OpenAI API error:", aiResponse.status, errorText);
+      
       if (aiResponse.status === 429) {
-        return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
           status: 429,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      if (aiResponse.status === 402) {
-        return new Response(JSON.stringify({ error: "Payment required" }), {
-          status: 402,
+      if (aiResponse.status === 401) {
+        return new Response(JSON.stringify({ error: "AI service authentication failed" }), {
+          status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error("AI gateway error");
+      throw new Error("AI service error");
     }
 
     const aiData = await aiResponse.json();
     const answer = aiData.choices?.[0]?.message?.content || "Unable to generate answer.";
 
-    // Create citations from top chunks
+    console.log("Successfully generated answer");
+
+    // Create detailed citations from top chunks
     const citations = topChunks
       .filter((c: any) => c.score > 0)
-      .slice(0, 3)
+      .slice(0, 5)
       .map((c: any) => ({
         page: c.page_number || 1,
-        text: c.content.substring(0, 150) + "...",
+        text: c.content.length > 200 ? c.content.substring(0, 200) + "..." : c.content,
       }));
 
     return new Response(JSON.stringify({ answer, citations }), {
