@@ -123,15 +123,27 @@ serve(async (req) => {
 
     console.log(`Using ${topChunks.length} chunks for context`);
 
-    // Call OpenAI API with detailed system prompt
-    const aiResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+    // Detect if it's an OpenRouter key (starts with sk-or-) or OpenAI key
+    const isOpenRouter = openaiApiKey.startsWith("sk-or-");
+    const apiUrl = isOpenRouter 
+      ? "https://openrouter.ai/api/v1/chat/completions"
+      : "https://api.openai.com/v1/chat/completions";
+    
+    const model = isOpenRouter ? "openai/gpt-4o-mini" : "gpt-4o-mini";
+    
+    console.log(`Using ${isOpenRouter ? 'OpenRouter' : 'OpenAI'} API with model: ${model}`);
+
+    // Call AI API with detailed system prompt
+    const aiResponse = await fetch(apiUrl, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${openaiApiKey}`,
         "Content-Type": "application/json",
+        ...(isOpenRouter && { "HTTP-Referer": "https://learnmateio.lovable.app" }),
+        ...(isOpenRouter && { "X-Title": "Learn Mate" }),
       },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: model,
         messages: [
           {
             role: "system",
@@ -171,7 +183,7 @@ Please provide a detailed, educational answer based on the document content abov
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error("OpenAI API error:", aiResponse.status, errorText);
+      console.error("AI API error:", aiResponse.status, errorText);
       
       if (aiResponse.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again in a moment." }), {
@@ -180,8 +192,14 @@ Please provide a detailed, educational answer based on the document content abov
         });
       }
       if (aiResponse.status === 401) {
-        return new Response(JSON.stringify({ error: "AI service authentication failed" }), {
+        return new Response(JSON.stringify({ error: "AI service authentication failed. Please check your API key." }), {
           status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (aiResponse.status === 402) {
+        return new Response(JSON.stringify({ error: "Insufficient credits. Please add funds to your API account." }), {
+          status: 402,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
