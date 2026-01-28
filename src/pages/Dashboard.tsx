@@ -14,12 +14,14 @@ import {
   Plus,
   BookOpen,
   Brain,
-  Layers
+  Layers,
+  HelpCircle
 } from 'lucide-react';
 import DocumentUpload from '@/components/DocumentUpload';
 import DocumentList from '@/components/DocumentList';
 import QAInterface from '@/components/QAInterface';
 import { FlashcardViewer } from '@/components/FlashcardViewer';
+import { QuizViewer } from '@/components/QuizViewer';
 
 interface Document {
   id: string;
@@ -35,7 +37,7 @@ export default function Dashboard() {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [showUpload, setShowUpload] = useState(false);
-  const [view, setView] = useState<'documents' | 'qa' | 'flashcards'>('documents');
+  const [view, setView] = useState<'documents' | 'qa' | 'flashcards' | 'quiz'>('documents');
   const [loadingDocs, setLoadingDocs] = useState(true);
 
   useEffect(() => {
@@ -142,6 +144,17 @@ export default function Dashboard() {
               >
                 <Layers className="w-4 h-4 inline mr-2" />
                 Flashcards
+              </button>
+              <button
+                onClick={() => setView('quiz')}
+                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                  view === 'quiz'
+                    ? 'bg-background text-foreground shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 inline mr-2" />
+                Quizzes
               </button>
             </nav>
 
@@ -297,6 +310,61 @@ export default function Dashboard() {
                     </CardContent>
                   </Card>
                 )}
+              </div>
+            )}
+          </div>
+        )}
+
+        {view === 'quiz' && (
+          <div className="animate-fade-in">
+            {documents.length === 0 ? (
+              <Card className="max-w-lg mx-auto text-center py-12">
+                <CardContent>
+                  <HelpCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-xl font-display font-semibold mb-2">No Documents Yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Upload a document first to generate quizzes
+                  </p>
+                  <Button onClick={() => { setView('documents'); setShowUpload(true); }}>
+                    Upload Document
+                  </Button>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <HelpCircle className="w-5 h-5 text-primary" />
+                      Test Your Knowledge
+                    </CardTitle>
+                    <CardDescription>
+                      Select a document and take AI-generated quizzes with scoring
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <select
+                      value={selectedDoc?.id || ''}
+                      onChange={(e) => {
+                        const doc = documents.find(d => d.id === e.target.value);
+                        setSelectedDoc(doc || null);
+                      }}
+                      className="w-full bg-secondary border border-border rounded-lg px-4 py-3 text-foreground"
+                    >
+                      <option value="">Select a document...</option>
+                      {documents.map((doc) => (
+                        <option key={doc.id} value={doc.id}>
+                          {doc.title}
+                        </option>
+                      ))}
+                    </select>
+                  </CardContent>
+                </Card>
+
+                <QuizViewer 
+                  documentId={selectedDoc?.id || null}
+                  userId={user.id}
+                />
               </div>
             )}
           </div>
