@@ -1,4 +1,3 @@
--- Create quizzes table
 CREATE TABLE public.quizzes (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
@@ -7,7 +6,6 @@ CREATE TABLE public.quizzes (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Create quiz questions table
 CREATE TABLE public.quiz_questions (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   quiz_id UUID NOT NULL REFERENCES public.quizzes(id) ON DELETE CASCADE,
@@ -18,7 +16,6 @@ CREATE TABLE public.quiz_questions (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Create quiz attempts table for scoring
 CREATE TABLE public.quiz_attempts (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
@@ -29,17 +26,15 @@ CREATE TABLE public.quiz_attempts (
   completed_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS
+
 ALTER TABLE public.quizzes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.quiz_questions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.quiz_attempts ENABLE ROW LEVEL SECURITY;
 
--- RLS policies for quizzes
 CREATE POLICY "Users can view their own quizzes" ON public.quizzes FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own quizzes" ON public.quizzes FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own quizzes" ON public.quizzes FOR DELETE USING (auth.uid() = user_id);
 
--- RLS policies for quiz_questions (access through quiz ownership)
 CREATE POLICY "Users can view questions for their quizzes" ON public.quiz_questions FOR SELECT 
   USING (EXISTS (SELECT 1 FROM public.quizzes WHERE quizzes.id = quiz_questions.quiz_id AND quizzes.user_id = auth.uid()));
 CREATE POLICY "Users can insert questions for their quizzes" ON public.quiz_questions FOR INSERT 
@@ -47,7 +42,6 @@ CREATE POLICY "Users can insert questions for their quizzes" ON public.quiz_ques
 CREATE POLICY "Users can delete questions for their quizzes" ON public.quiz_questions FOR DELETE 
   USING (EXISTS (SELECT 1 FROM public.quizzes WHERE quizzes.id = quiz_questions.quiz_id AND quizzes.user_id = auth.uid()));
 
--- RLS policies for quiz_attempts
 CREATE POLICY "Users can view their own attempts" ON public.quiz_attempts FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert their own attempts" ON public.quiz_attempts FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own attempts" ON public.quiz_attempts FOR DELETE USING (auth.uid() = user_id);

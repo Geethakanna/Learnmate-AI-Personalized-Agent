@@ -1,4 +1,3 @@
--- Create flashcards table
 CREATE TABLE public.flashcards (
   id UUID NOT NULL DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID NOT NULL,
@@ -9,10 +8,8 @@ CREATE TABLE public.flashcards (
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now()
 );
 
--- Enable RLS
 ALTER TABLE public.flashcards ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
 CREATE POLICY "Users can view their own flashcards"
 ON public.flashcards FOR SELECT
 USING (auth.uid() = user_id);

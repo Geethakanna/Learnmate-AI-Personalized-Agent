@@ -36,7 +36,6 @@ serve(async (req) => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get document info
     const { data: document, error: docError } = await supabase
       .from('documents')
       .select('title, content')
@@ -50,7 +49,6 @@ serve(async (req) => {
       );
     }
 
-    // Get document chunks for context
     const { data: chunks, error: chunksError } = await supabase
       .from('document_chunks')
       .select('content')
@@ -67,7 +65,6 @@ serve(async (req) => {
     
     console.log(`Using ${truncatedContent.length} characters of content`);
 
-    // Auto-detect OpenRouter vs OpenAI
     const isOpenRouter = openaiApiKey.startsWith("sk-or-");
     const apiUrl = isOpenRouter 
       ? "https://openrouter.ai/api/v1/chat/completions" 
@@ -130,7 +127,6 @@ ${truncatedContent}`;
     const aiResponse = await response.json();
     let questionsText = aiResponse.choices[0]?.message?.content || '';
     
-    // Clean up response
     questionsText = questionsText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
     
     let questions;
@@ -144,7 +140,6 @@ ${truncatedContent}`;
       );
     }
 
-    // Create quiz record
     const { data: quiz, error: quizError } = await supabase
       .from('quizzes')
       .insert({
@@ -163,7 +158,6 @@ ${truncatedContent}`;
       );
     }
 
-    // Insert questions
     const questionsToInsert = questions.map((q: any) => ({
       quiz_id: quiz.id,
       question: q.question,

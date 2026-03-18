@@ -1,4 +1,3 @@
--- Create profiles table for user data
 CREATE TABLE public.profiles (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL UNIQUE REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -7,10 +6,8 @@ CREATE TABLE public.profiles (
   last_login TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Enable RLS on profiles
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- Profiles policies
 CREATE POLICY "Users can view their own profile"
   ON public.profiles FOR SELECT
   USING (auth.uid() = user_id);
@@ -23,7 +20,6 @@ CREATE POLICY "Users can insert their own profile"
   ON public.profiles FOR INSERT
   WITH CHECK (auth.uid() = user_id);
 
--- Create documents table
 CREATE TABLE public.documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -37,10 +33,8 @@ CREATE TABLE public.documents (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Enable RLS on documents
 ALTER TABLE public.documents ENABLE ROW LEVEL SECURITY;
 
--- Documents policies
 CREATE POLICY "Users can view their own documents"
   ON public.documents FOR SELECT
   USING (auth.uid() = user_id);
@@ -57,7 +51,6 @@ CREATE POLICY "Users can delete their own documents"
   ON public.documents FOR DELETE
   USING (auth.uid() = user_id);
 
--- Create document_chunks table for RAG
 CREATE TABLE public.document_chunks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   document_id UUID NOT NULL REFERENCES public.documents(id) ON DELETE CASCADE,
@@ -69,10 +62,8 @@ CREATE TABLE public.document_chunks (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Enable RLS on document_chunks
 ALTER TABLE public.document_chunks ENABLE ROW LEVEL SECURITY;
 
--- Document chunks policies
 CREATE POLICY "Users can view their own document chunks"
   ON public.document_chunks FOR SELECT
   USING (auth.uid() = user_id);
@@ -85,7 +76,6 @@ CREATE POLICY "Users can delete their own document chunks"
   ON public.document_chunks FOR DELETE
   USING (auth.uid() = user_id);
 
--- Create qa_sessions table for conversation history
 CREATE TABLE public.qa_sessions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
@@ -96,10 +86,8 @@ CREATE TABLE public.qa_sessions (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
--- Enable RLS on qa_sessions
 ALTER TABLE public.qa_sessions ENABLE ROW LEVEL SECURITY;
 
--- QA sessions policies
 CREATE POLICY "Users can view their own qa sessions"
   ON public.qa_sessions FOR SELECT
   USING (auth.uid() = user_id);
@@ -112,7 +100,6 @@ CREATE POLICY "Users can delete their own qa sessions"
   ON public.qa_sessions FOR DELETE
   USING (auth.uid() = user_id);
 
--- Create function for automatic profile creation
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -122,13 +109,11 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER SET search_path = public;
 
--- Create trigger for automatic profile creation
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users
   FOR EACH ROW
   EXECUTE FUNCTION public.handle_new_user();
 
--- Create function to update timestamps
 CREATE OR REPLACE FUNCTION public.update_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -137,17 +122,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql SET search_path = public;
 
--- Create trigger for documents updated_at
 CREATE TRIGGER update_documents_updated_at
   BEFORE UPDATE ON public.documents
   FOR EACH ROW
   EXECUTE FUNCTION public.update_updated_at();
 
--- Create storage bucket for documents
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('documents', 'documents', false);
 
--- Storage policies for documents bucket
 CREATE POLICY "Users can upload their own documents"
   ON storage.objects FOR INSERT
   WITH CHECK (bucket_id = 'documents' AND auth.uid()::text = (storage.foldername(name))[1]);

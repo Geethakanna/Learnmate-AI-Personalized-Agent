@@ -57,7 +57,6 @@ serve(async (req) => {
 
     console.log(`Processing question for document ${documentId}: ${question}`);
 
-    // Fetch document chunks
     const { data: chunks, error: chunksError } = await supabase
       .from("document_chunks")
       .select("content, page_number, chunk_index")
@@ -84,7 +83,6 @@ serve(async (req) => {
 
     console.log(`Found ${chunks.length} chunks for document`);
 
-    // Enhanced keyword-based retrieval with better scoring
     const questionLower = question.toLowerCase();
     const questionWords = questionLower
       .split(/\s+/)
@@ -95,18 +93,15 @@ serve(async (req) => {
       const content = chunk.content.toLowerCase();
       let score = 0;
       
-      // Exact phrase match bonus
       if (content.includes(questionLower)) {
         score += 10;
       }
       
-      // Individual word matches
       for (const word of questionWords) {
         const matches = (content.match(new RegExp(word, 'gi')) || []).length;
         score += matches * 2;
       }
       
-      // Boost chunks with higher density of matches
       const wordCount = content.split(/\s+/).length;
       const density = score / (wordCount / 100);
       
@@ -115,7 +110,6 @@ serve(async (req) => {
 
     scoredChunks.sort((a: any, b: any) => b.score - a.score);
     
-    // Get more chunks for better context
     const topChunks = scoredChunks.slice(0, 8);
     const context = topChunks.map((c: any, i: number) => 
       `[Source ${i + 1}${c.page_number ? `, Page ${c.page_number}` : ''}]:\n${c.content}`
@@ -123,7 +117,6 @@ serve(async (req) => {
 
     console.log(`Using ${topChunks.length} chunks for context`);
 
-    // Detect if it's an OpenRouter key (starts with sk-or-) or OpenAI key
     const isOpenRouter = openaiApiKey.startsWith("sk-or-");
     const apiUrl = isOpenRouter 
       ? "https://openrouter.ai/api/v1/chat/completions"
@@ -133,7 +126,6 @@ serve(async (req) => {
     
     console.log(`Using ${isOpenRouter ? 'OpenRouter' : 'OpenAI'} API with model: ${model}`);
 
-    // Call AI API with detailed system prompt
     const aiResponse = await fetch(apiUrl, {
       method: "POST",
       headers: {
@@ -211,7 +203,6 @@ Please provide a detailed, educational answer based on the document content abov
 
     console.log("Successfully generated answer");
 
-    // Create detailed citations from top chunks
     const citations = topChunks
       .filter((c: any) => c.score > 0)
       .slice(0, 5)
