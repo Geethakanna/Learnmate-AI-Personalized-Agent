@@ -1,422 +1,218 @@
-LearnMate
-Intelligent Adaptive AI Learning System
+# LearnMate
 
-Live Demo:
-https://learnmate-beta.vercel.app
+<p align="center">
+  <img src="assets/learnmate-banner.png" alt="LearnMate Banner" width="100%">
+</p>
 
-Overview
+<p align="center">
+  <strong>AI-Powered Adaptive Learning Platform</strong>
+</p>
 
-LearnMate is an AI-powered adaptive learning platform that transforms traditional AI-assisted studying into a personalized learning experience. Instead of simply answering questions, LearnMate continuously evaluates learner performance, identifies knowledge gaps, generates adaptive learning paths, and provides intelligent academic guidance.
+<p align="center">
+  Personalized Learning • Intelligent Tutoring • Learning Analytics • RAG
+</p>
 
-The system combines Large Language Models (LLMs), Retrieval-Augmented Generation (RAG), learner analytics, vector databases, and adaptive learning algorithms to create a personalized educational ecosystem. The goal is to move beyond one-size-fits-all learning and provide each learner with a customized learning journey. Similar research has shown that LLM-driven personalized learning systems can improve learner support and educational outcomes when personalization is integrated into the learning process.
+<p align="center">
+  <a href="https://learnmate-beta.vercel.app">Live Demo</a> •
+  <a href="#features">Features</a> •
+  <a href="#system-architecture">Architecture</a> •
+  <a href="#installation">Installation</a>
+</p>
 
-Live Application
+---
 
-The deployed version of LearnMate can be accessed here:
+## Live Demo
 
-Launch LearnMate:
-LearnMate Live Application
+**Website:** https://learnmate-beta.vercel.app
 
-Features available in the live version:
+Experience LearnMate directly through the deployed application.
 
-AI-powered tutoring
-Flashcard generation
-Quiz generation
-Learning analytics dashboard
-Personalized learning recommendations
-Topic-based learning paths
-Progress tracking
-Problem Statement
+---
 
-Modern AI learning platforms primarily focus on information retrieval and question answering. While these tools provide quick responses, they often lack:
+## About LearnMate
 
-Long-term learner tracking
-Personalized curriculum planning
-Concept mastery evaluation
-Adaptive assessments
-Performance analytics
-Knowledge gap detection
+LearnMate is an intelligent adaptive learning platform that combines Large Language Models (LLMs), Retrieval-Augmented Generation (RAG), learner analytics, and personalized curriculum planning to create a customized learning experience.
 
-As a result, learners receive information but lack structured guidance toward mastery. LearnMate addresses this challenge through an intelligent adaptive learning framework that continuously learns from user interactions.
+Unlike traditional AI assistants that simply answer questions, LearnMate tracks learner progress, identifies knowledge gaps, and adapts learning pathways to improve concept mastery and retention.
 
-Project Objectives
-Primary Objectives
-Deliver personalized learning experiences
-Improve concept understanding and retention
-Generate adaptive learning paths
-Identify learner weaknesses
-Provide AI-assisted tutoring
-Track learning progress continuously
-Secondary Objectives
-Reduce information overload
-Improve study efficiency
-Support self-paced learning
-Enable data-driven educational insights
-Key Features
-AI Tutoring Engine
+---
 
-Provides:
+## Features
 
-Context-aware explanations
-Step-by-step problem solving
-Concept simplification
-Personalized academic support
-Example-based learning
-Retrieval-Augmented Generation (RAG)
+### AI Tutoring
 
-LearnMate integrates a Retrieval-Augmented Generation pipeline to improve answer quality.
+* Context-aware explanations
+* Step-by-step learning support
+* Concept simplification
+* Example-based teaching
 
-Benefits:
+### Adaptive Learning
 
-Reduced hallucination
-Context-aware responses
-Improved factual accuracy
-Knowledge-grounded explanations
-Adaptive Learning System
+* Personalized learning paths
+* Dynamic topic progression
+* Knowledge gap identification
+* Revision recommendations
 
-The platform adapts based on:
+### Assessment System
 
-Learner performance
-Quiz results
-Study activity
-Learning behavior
+* Quiz generation
+* Flashcard generation
+* Performance evaluation
+* Progress tracking
 
-Outputs:
+### Learning Analytics
 
-Personalized recommendations
-Dynamic topic progression
-Revision suggestions
-Cognitive Profiling
+* Learning dashboard
+* Accuracy tracking
+* Study time analysis
+* Performance insights
 
-Tracks:
+### Retrieval-Augmented Generation
 
-Concept mastery
-Learning speed
-Learning consistency
-Knowledge retention
-Weak and strong topics
-Assessment Engine
+* Context-aware responses
+* Reduced hallucination
+* Semantic document retrieval
+* Knowledge-grounded explanations
 
-Supports:
+---
 
-Quiz generation
-Flashcard generation
-Concept testing
-Topic evaluation
-Performance scoring
-Learning Analytics Dashboard
+## System Architecture
 
-Displays:
+<p align="center">
+  <img src="assets/architecture.png" width="900">
+</p>
 
-Learning progress
-Quiz performance
-Study time
-Topic completion
-Accuracy metrics
-System Design
-High-Level Architecture
-User
- │
- ▼
-User Interface
-(Web / Mobile)
- │
- ▼
-Input Processing
- │
- ▼
-AI Learning Engine
-(LLM + RAG)
- │
- ▼
-Learning Intelligence Core
- ├─ Cognitive Profiling
- ├─ Curriculum Planning
- └─ Assessment Engine
- │
- ▼
-Data Layer
- ├─ Supabase
- └─ Vector Database
- │
- ▼
-Learning Analytics
- │
- ▼
-Personalized Output
-System Components
-1. User Interface Layer
+The LearnMate architecture consists of:
 
-Provides interaction between learners and the platform.
+* User Interface Layer
+* Input Processing Layer
+* AI Learning Engine
+* Learning Intelligence Core
+* Data Layer
+* Analytics Engine
+* Output Layer
 
-Functions:
+---
 
-Learning dashboard
-Chat interface
-Quiz interface
-Flashcard interface
-Progress tracking
-2. Input Processing Layer
+## Technology Stack
 
-Responsible for:
+| Category     | Technologies                             |
+| ------------ | ---------------------------------------- |
+| Frontend     | Next.js, React, TypeScript, Tailwind CSS |
+| Backend      | FastAPI, Python                          |
+| AI Models    | OpenAI GPT, Llama, Sentence Transformers |
+| RAG          | LangChain                                |
+| Database     | Supabase (PostgreSQL)                    |
+| Vector Store | FAISS, ChromaDB                          |
+| Deployment   | Vercel, Docker                           |
 
-Query preprocessing
-Text normalization
-Content extraction
-Context preparation
-3. AI Learning Engine
+---
 
-Core AI component.
+## Project Structure
 
-Responsibilities:
-
-Understanding learner intent
-Generating explanations
-Supporting tutoring workflows
-Content generation
-4. Learning Intelligence Core
-
-The most important component of LearnMate.
-
-Contains:
-
-Cognitive Profiling Engine
-
-Tracks:
-
-Learning behavior
-Knowledge growth
-Performance trends
-Curriculum Engine
-
-Generates:
-
-Learning paths
-Topic recommendations
-Revision schedules
-Assessment Engine
-
-Creates:
-
-Quizzes
-Flashcards
-Evaluations
-5. Data Layer
-Supabase
-
-Stores:
-
-User accounts
-Learning history
-Assessment records
-Analytics data
-
-Supabase was selected over MongoDB due to better relational querying, analytics support, and structured learner data management.
-
-Vector Database
-
-Stores:
-
-Embeddings
-Learning resources
-Knowledge chunks
-
-Used for semantic retrieval within the RAG pipeline.
-
-6. Analytics Engine
-
-Processes:
-
-Accuracy
-Completion rate
-Learning trends
-Mastery scores
-
-Generates:
-
-Progress reports
-Learning recommendations
-Performance insights
-Adaptive Cognitive Learning Algorithm (ACLA)
-
-LearnMate introduces a custom learning algorithm called ACLA.
-
-Workflow
-Collect Learner Data
-        │
-        ▼
-Evaluate Performance
-        │
-        ▼
-Compute Mastery Score
-        │
-        ▼
-Knowledge Gap Detection
-        │
-        ▼
-Adaptive Recommendation
-        │
-        ▼
-Update Learner Profile
-        │
-        ▼
-Repeat Learning Cycle
-Benefits
-Continuous personalization
-Dynamic adaptation
-Improved retention
-Targeted remediation
-Retrieval-Augmented Generation Pipeline
-User Query
-      │
-      ▼
-Query Embedding
-      │
-      ▼
-Vector Search
-      │
-      ▼
-Retrieve Context
-      │
-      ▼
-Context Integration
-      │
-      ▼
-LLM Processing
-      │
-      ▼
-Response Generation
-Technology Stack
-Frontend
-Next.js
-React.js
-TypeScript
-Tailwind CSS
-ShadCN UI
-Backend
-FastAPI
-Python
-AI & Machine Learning
-OpenAI GPT Models
-Sentence Transformers
-LangChain
-Retrieval-Augmented Generation
-Databases
-Relational Database
-Supabase (PostgreSQL)
-Vector Database
-FAISS
-ChromaDB
-Analytics
-Pandas
-NumPy
-Scikit-Learn
-Deployment
-Vercel
-Docker
-Railway
-AWS (Optional)
-Project Structure
+```bash
 learnmate/
 │
 ├── frontend/
-│   ├── components/
-│   ├── pages/
-│   ├── app/
-│   └── public/
-│
 ├── backend/
-│   ├── api/
-│   ├── services/
-│   ├── models/
-│   └── utils/
-│
-├── vector_db/
-│
 ├── data/
-│
+├── vector_db/
 ├── docs/
-│
 └── README.md
-Installation
-Clone Repository
-git clone https://github.com/yourusername/learnmate.git
+```
+
+---
+
+## Installation
+
+### Clone Repository
+
+```bash
+git clone https://github.com/username/learnmate.git
 cd learnmate
-Create Virtual Environment
-Windows
+```
+
+### Backend Setup
+
+```bash
 python -m venv venv
+
+# Windows
 venv\Scripts\activate
-Linux / macOS
-python3 -m venv venv
+
+# Linux / Mac
 source venv/bin/activate
-Install Dependencies
+
 pip install -r requirements.txt
-Configure Environment Variables
+```
 
-Create .env file:
+### Environment Variables
 
-OPENAI_API_KEY=your_api_key
-SUPABASE_URL=your_supabase_url
-SUPABASE_KEY=your_supabase_key
-Run Backend
+```env
+OPENAI_API_KEY=your_key
+SUPABASE_URL=your_url
+SUPABASE_KEY=your_key
+```
+
+### Run Backend
+
+```bash
 uvicorn app.main:app --reload
+```
 
-Backend:
+### Run Frontend
 
-http://localhost:8000
-Run Frontend
+```bash
 npm install
 npm run dev
+```
 
-Frontend:
+---
 
-http://localhost:3000
-Testing Results
-Module	Status
-Authentication	Passed
-AI Tutoring	Passed
-Quiz Generation	Passed
-Flashcard Generation	Passed
-Knowledge Retrieval	Passed
-Learning Analytics	Passed
-Adaptive Learning	Passed
-Database Integration	Passed
-Future Enhancements
-Emotion-aware learning adaptation
-Voice-based tutoring
-Knowledge graph integration
-Offline local LLM deployment
-Multi-language support
-Performance prediction engine
-Burnout detection using learning analytics
-Research Contributions
+## Adaptive Cognitive Learning Algorithm (ACLA)
 
-LearnMate introduces:
+LearnMate introduces ACLA, a personalized learning algorithm that:
 
-Adaptive Cognitive Learning Algorithm (ACLA)
-Learner Cognitive Profiling
-Dynamic Curriculum Planning
-Personalized Assessment Engine
-Closed-Loop Learning Framework
-AI-Driven Learning Analytics
-References
+1. Tracks learner performance
+2. Computes mastery scores
+3. Identifies weak concepts
+4. Adapts learning paths
+5. Generates targeted recommendations
 
-The project is inspired by recent advancements in AI-powered personalized learning systems, adaptive tutoring frameworks, and Retrieval-Augmented Generation techniques. LearnMate extends these ideas by integrating adaptive learning intelligence, learner profiling, and continuous performance optimization.
+---
 
-Authors
+## Testing Results
 
-Geetha K
+| Module               | Status |
+| -------------------- | ------ |
+| Authentication       | Passed |
+| AI Tutoring          | Passed |
+| RAG Pipeline         | Passed |
+| Assessment Engine    | Passed |
+| Learning Analytics   | Passed |
+| Database Integration | Passed |
+
+---
+
+## Future Roadmap
+
+* Emotion-aware learning
+* Voice tutoring
+* Knowledge graph integration
+* Local LLM support
+* Multi-language learning
+* Predictive learning analytics
+
+---
+
+## Author
+
+**Geetha K**
 B.Tech Artificial Intelligence and Data Science
 National Engineering College
 
-License
+---
+
+## License
 
 MIT License
-
-Citation
-Geetha K.
-LearnMate: Intelligent Adaptive AI Learning System.
-2025.
-
-Live Demo:
-LearnMate Beta Deployment
