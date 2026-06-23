@@ -27,6 +27,9 @@
 
 Experience LearnMate directly through the deployed application.
 
+<img width="1478" height="579" alt="image" src="https://github.com/user-attachments/assets/ec6db945-5986-40a4-ae2d-c90375093614" />
+
+
 ---
 
 ## About LearnMate
